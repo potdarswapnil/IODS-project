@@ -1,0 +1,7 @@
+#Inroduction to Open Data Science
+
+##Tools and methods for open and reproducible research
+
+* This is the introductory part to R, RStudio, GitHub etc
+
+Here is the Link to the my Course Diary: <https://potdarswapnil.github.io/IODS-project/>

@@ -1,10 +1,7 @@
-# Insert chapter 2 title here
+# Introductary tools
 
-*Describe the work you have done this week and summarize your learning.*
+* Introductory week for learning the R, R-studio and GitHub.
 
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using  
-
-
--Swapnil Potdar
+- I started with the videos for the getting started with R Studio
+- Created GitHub account and set up GitHub repositories on the server and on the local machine using GitHub Desktop
+- Started diving into the Knitr,HTMl etc 

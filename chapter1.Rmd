@@ -1,8 +1,11 @@
-# About the project
+# Introduction to Open Data Science
 
-*Write a short description about the course and add a link to your github repository here. This is an R markdown (.Rmd) file so you can use R markdown syntax. See the 'Useful links' page in the mooc area (chapter 1) for instructions.*
+This is course is an introductory course in the Data Science which deals with Data Analysis with the help of R. 
 
-This is Swapnil Potdar !!
+We use R, Rstudio,GitHub etc.
+
+<https://potdarswapnil.github.io/IODS-project>
+
 
 
 

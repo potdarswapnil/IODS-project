@@ -4,7 +4,8 @@ This is course is an introductory course in the Data Science which deals with Da
 
 We use R, Rstudio,GitHub etc.
 
-<https://potdarswapnil.github.io/IODS-project>
+
+Link : <https://potdarswapnil.github.io/IODS-project>
 
 
 

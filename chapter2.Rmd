@@ -1,7 +1,87 @@
-# Introductary tools
+#2 Regression and model validation
 
-* Introductory week for learning the R, R-studio and GitHub.
+##2.1. Read the students2014 Dataset
 
-- I started with the videos for the getting started with R Studio
-- Created GitHub account and set up GitHub repositories on the server and on the local machine using GitHub Desktop
-- Started diving into the Knitr,HTMl etc 
+
+*Data Source: International Survey from students enrolled to Introduction to Social Statistics in fall 2014*
+*Data Collection Timeframe : 3.12.2014 - 10.01.2015*
+*Data Creation Date ; 14.01.2015.*
+*Sample size: 183 with 63 variables*
+*The data set was filtered with columns of interest and with points > 0 to get a dataset of 166 subjects and 7 variables*
+
+```{r}
+learnings <- read.table("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/learning2014.txt", sep = ",", header = T) 
+dim(learnings)
+head(learnings)
+str(learnings)
+```
+
+
+##2.2 Graphical overview and summary of the data
+#### load libraries GGally and ggplot2 for plotting
+
+```{r}
+library(GGally)
+library(ggplot2)
+library(progress)
+```
+####Plot the data
+```{r}
+plot_data <- ggpairs(learnings, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
+print(plot_data)
+```
+
+####Summarize
+```{r}
+summary(learnings)
+```
+#### Discription:
+*a. Bar Chart shows Females are nearly double that of males*
+*b. Attitute is much higher in males.*
+*c. Deep,surface have negative correlations in males and females*
+*d. Males have negative correlation of Age with attitute, deep, surface and points*
+*e. Females have negative correlation of Age with Surface and Points*
+*f. Points correlate heavily with attitude (Cor = 0.437), stra (Cor = 0.146)*
+*g. Histograms indicate skewness in age for males and females showing younger population*
+
+
+
+##2.3. Regression model
+```{r}
+regression_model <- lm(points ~ attitude + stra + surf, data = learnings)
+summary(regression_model)
+```
+*In this multivariate model, we are explaining the variable points against attitude, stra and surf i.e. the explainatory variables.*
+*Based on the regression model, points have significant relationship with attitude (summary)*
+*stra and surf show no significant relationship with points*
+*R-squared value of 0.20 implies that the model can explain 20% or one-fifth of the variation in the outcome.*
+
+
+##2.4 Interpret the model parameters after removing stra and surf
+```{r}
+new_regression_model <- lm(points ~ attitude, data = learnings)
+summary(new_regression_model)
+```
+*This univariate model shoes  that  points is significantly realted to attitude *
+*Multiple R-squared:  0.1151*
+*R-squared = Explained variation / Total variation*
+*R-squared is always between 0 and 100%:*
+*0% indicates that the model explains none of the variability of the response data around its mean.*
+*100% indicates that the model explains all the variability of the response data around its mean.*
+*Multiple R-squared is used for evaluating how well the model fits the data. In this case, R-squared value of 0.11 implies that the model can explain only 11% of the variation in the outcome.*
+
+##2.5 Diagnostic plots
+```{r}
+my_model2 <- lm(points ~ attitude + stra, data = learnings)
+# draw diagnostic plots using the plot() function. Choose the plots 1(Residuals vs Fitted values), 2(Normal QQ-plot) and 5 (Residuals vs Leverage)
+par(mfrow = c(2,2))
+plot(new_regression_model, which = c(1, 2, 5))
+```
+*Assumptions of the model*
+*a. How well the model descrices the variables we are interested in*
+*b. Linearity: The target variable is modelled as a linear combination of the model parameters*
+*c. Errors are normally disrtibuted, not correlated and have constant variance*
+*Residual vs Fitted plot explains about variance in errors. We could see that some errors deviate from the regression line implying that there is issue with the model*
+*QQplot of our model shows that most points fall close to the line but some points are not close on the left hand side of the graph, hence the fit is somewhere near to the normality assumption. The model is reasonably okay.*
+*Leverage plot shows the impact of a single observation on the model. There are some observations (values of -3) that have a high impact on the model which is not good.*
+

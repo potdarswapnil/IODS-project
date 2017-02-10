@@ -1,0 +1,155 @@
+#3  Logistic regression
+
+##3.1. Students aclohol dataset
+
+Read the alcohol consumption data from following location [here](https://archive.ics.uci.edu/ml/datasets/STUDENT+ALCOHOL+CONSUMPTION)
+
+Citation: 
+P. Cortez and A. Silva. Using Data Mining to Predict Secondary School Student Performance. In A. Brito and J. Teixeira Eds., Proceedings of 5th FUture BUsiness TEChnology Conference (FUBUTEC 2008) pp. 5-12, Porto, Portugal, April, 2008, EUROSIS, ISBN 978-9077381-39-7.
+
+  Changes in the dataset:
+
+  *The variables not used for joining the two data have been combined by averaging (including the grade variables)
+  *'alc_use' is the average of 'Dalc' and 'Walc'
+  *'high_use' is TRUE if 'alc_use' is higher than 2 and FALSE otherwise
+
+##3.2. Read the file
+The data are read using the following command:
+
+```{r}
+##Load required libraries
+library(GGally)
+library(ggplot2)
+library(dplyr)
+library(reshape2)
+
+#read the data in the file produced at the end of the assignment
+alc<- read.table("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/alc.txt", sep=",",header=TRUE)
+
+
+dim(alc)
+str(alc)
+head(alc)
+colnames(alc)
+
+```
+
+## 3.3. Choice of depending variables, which affect alcohol consumption 
+
+The purpose of this analysis is to study the relationships between high/low alcohol consumption and some of the other variables in the data. 
+
+There are numerous parameters which are affected by the alcohol consumption. To analyse and hypothyze different relationships, one can easily study following parameters.
+
+1. Sex - student's sex (binary: 'F' - female or 'M' - male): Usually a big differentiating factor.
+2. Age - student's age (numeric: from 15 to 22) : Age plays crucial role in analyzing the alcohol consumpution (what age we should be careful)
+3. Health - current health status (numeric: from 1 - very bad to 5 - very good) : Easily the most related parameter depending upon the consumption
+4. Absences - number of school absences (numeric: from 0 to 93) : How are studies affected by the alcohol consumption
+
+
+## 3.4 Graphical representation of distributions of the relationships between alcohol consumptions and the variables. 
+
+
+### Box plots
+
+box plot or boxplot is a convenient way of graphically depicting groups of numerical data through their quartiles. Box represents area of the first quartile to the third quartile. Line shows median and "whiskers" above and below the box show the locations of the minimum and maximum. Points plotted outside are outliers.
+
+
+```{r}
+g1 <- ggplot(alc, aes(x = high_use, y = G3, col=sex)) + ggtitle("Impact of Alchohol Consumption on grades")
+g1 + geom_boxplot() + ylab("grade")
+
+```
+We can immediately see that when there lower use of alcohol then both males and females have identical medians with males edging a bit higher. Wih high alcohol percentage, males are affected more. ALso interesting to note that median of females' grade does not change much however upper grade range seem to come down. Males are affected with number of outliers.
+
+
+```{r}
+g2 <- ggplot(alc, aes(x = high_use, y = absences, col=sex)) + ggtitle("Impact of Alchohol Consumption on absences")
+g2 + geom_boxplot() + ylab("Absences")
+```
+Again we see males are worse affected by increasing number absences and median going up. With high use absences almost double for males and substantial increase in female absences
+
+```{r}
+g3 <- ggplot(alc, aes(x = high_use, y = health, col=sex)) + ggtitle("Impact of Alchohol Consumption on Student grades and Health")
+g3 + geom_boxplot() + ylab("Health") + scale_y_reverse()
+```
+
+Appearantly males health does not suffer much with high consumption but females are more sensitive with higher alcohol consumption
+
+
+```{r}
+g4 <- ggplot(alc, aes(x = high_use, y = age, col=sex)) + ggtitle("Student absences by alcohol consumption and age")
+g4 + geom_boxplot() + ylab("Age")
+```
+High consumption at the median age of 17 for males while 16 .5 for females. Males start early with low consumption while females start an year later. 
+
+While it is not the entire set of variables. These factors are indicative of the impact of alchol consumption on students.
+
+
+### Bar plots
+
+Bar plots are one of the most commonly used kind of data visualization. They are used to display numeric values (on the y-axis), for different categories (on the x-axis).
+
+
+```{r}
+bp <- ggplot(alc, aes(health, fill=high_use)) + geom_bar(position="dodge") + 
+  ggtitle("Barplot of health for high and low alcohol usage")
+bp
+
+bp2 <- ggplot(alc, aes(sex, fill=high_use)) + geom_bar(position="dodge") + 
+  ggtitle("Barplot of free time counts for high and low alcohol usage")
+bp2
+
+bp3 <- ggplot(alc, aes(absences, fill=high_use)) + geom_bar(position="dodge") + 
+  ggtitle("Barplot of absence counts for high and low alcohol usage")
+bp3
+
+bp4 <- ggplot(alc, aes(G3, fill=high_use)) + geom_bar(position="dodge") + 
+  ggtitle("Barplot of grades counts for high and low alcohol usage")
+bp4
+```
+
+Barplots confirm the findings in the box plots in different way.
+
+```{r}
+ 
+b3 <- ggplot(alc, aes(x=high_use, y=absences, fill=health)) +
+  geom_bar(stat="identity", position=position_dodge()) +
+  ggtitle("Student absences by alcohol consumption and health")
+# draw the plot
+b3
+```
+
+### Cross-tabulations (contingency table)
+
+Cross tabulations are type of tables in a matrix format that displays the (multivariate) frequency distribution of the variables. They provide a basic picture of the interrelation between two variables and can help find interactions between them.
+
+```{r}
+library(descr)
+CrossTable(alc$health,alc$high_use, prop.t=TRUE, prop.r=TRUE, prop.c=TRUE)
+```
+
+```{r}
+CrossTable(alc$sex,alc$high_use, prop.t=TRUE, prop.r=TRUE, prop.c=TRUE)
+```
+
+## 3.5 Logistic regression
+
+Model the variable high_use as a function of chosen dependent variables using logistic regression. 
+
+Logistic regression is a method for fitting a regression curve,  y = f(x), when y consists of proportions or probabilities, or binary coded (0,1--failure, success) data. When the response is a binary (dichotomous) variable, and x is numeric, logistic regression fits a logistic curve to the relationship between x and y. 
+
+We define the students health as a factorial variable (it takes values 1-5). 
+The model and results (summary and coefficients) are given using following functions: 
+
+```{r}
+alc$health <- factor(alc$health)
+m <- glm(high_use ~ G3 + absences+sex+health, data = alc, family = "binomial")
+summary(m)
+coef(m)
+confint(m)
+confint.default(m)
+```
+
+## Link to GitHub Project
+
+https://github.com/potdarswapnil/IODS-project

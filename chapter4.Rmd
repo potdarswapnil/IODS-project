@@ -128,7 +128,7 @@ train <- boston_scaled[ind,]
 test <- boston_scaled[-ind,]
 ```
 
-### LDA modeling using training data
+##4.5 LDA modeling using training data
 
 Linear discriminant model on training data 
   
@@ -158,7 +158,7 @@ lda.arrows(lda.fit, myscale = 2)
 
 ```
 
-##4.5 LDA for prediction: use of test data. 
+##4.6 LDA for prediction: use of test data. 
 
 *Prediction of the LDA model to classify the test data.
 *In order to analyze the model performance we use cross tabulation and create a table consisting of correct and predicted classes. 
@@ -169,7 +169,7 @@ table(correct = test$crime, predicted = lda.pred$class)
 ```
 We can use table() function to produce a matrix in order to determine how many observations were correctly or incorrectly classified. 
 
-##4.6 Distance measures and clustering. K-means algorithm
+##4.7 Distance measures and clustering. K-means algorithm
 
 * In clustering the number of classes is unknown, and the data are grouped based on their similarity. 
 * Standardize Boston Data Boston data. 
@@ -202,4 +202,34 @@ pairs(Boston, col = km$cluster)
 
 The results show that twcss drops significantly at  k=2. On the last graphics we calculate and plot **kmeans** function for 2 clusters because it is easier to show. 
 
+##4.Bonus.1
 
+```{r}
+set.seed(123)
+data("Boston")
+boston_scaled2 <- as.data.frame(scale(Boston, center = TRUE, scale = TRUE))
+dist_eu2 <- dist(boston_scaled2, method = "euclidean")
+km2 <- kmeans(dist_eu2, centers = 5)
+boston_scaled2$cluster <- km2$cluster
+lda.fit2 <- lda(cluster ~ ., data =boston_scaled2)
+plot(lda.fit2, col=as.numeric(boston_scaled2$cluster), dimen=2)
+lda.arrows(lda.fit2, myscale = 3, col = "#666666")
+
+```
+
+##4.Bonus.2
+```{r}
+library(plotly)
+model_predictors <- dplyr::select(train, -crime)
+
+dim(model_predictors)
+dim(lda.fit$scaling)
+
+matrix_product <- as.matrix(model_predictors) %*% lda.fit$scaling
+matrix_product <- as.data.frame(matrix_product)
+plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers', color=train$crime)
+
+train$cluster <- boston_scaled2$cluster[match(rownames(train), rownames(boston_scaled2))]
+plot_ly(x = matrix_product$LD1, y = matrix_product$LD2, z = matrix_product$LD3, type= 'scatter3d', mode='markers', color=as.factor(train$cluster))
+
+```

@@ -1,0 +1,137 @@
+#5  Dimensionality Reduction Techniques
+
+##5.1. Human Data from United Nations 
+
+#Load Libraries
+```{r}
+library(GGally)
+library(corrplot)
+library(tidyr)
+library(dplyr)
+```
+# data
+
+```{r}
+```
+
+```{r}
+human <- read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_2218/datasets/human2.txt", header = TRUE)
+dim(human)
+str(human)
+```
+*Data Frame with 155 Rows and 8 Columns
+*The human dataset contains various indicators of the well-being of various countries. The summary shows, there are altogether 155 observations (i.e. countries) and these are the variables:
+*Edu2.FM: the ratio of females to males in secondary education
+*Labo.FM: the ratio of females to males in the labour force
+*Edu.Exp: expected number of years spent in schooling
+*Life.Exp: life expectancy in years
+*GNI: gross national income
+*Mat.Mor: the relativised number of mothers who die at child birth
+*Ado.Birth: the rate of teenage pregnancies leading to child birth
+*Parli.F: the percentage of female parliamentarians
+
+#Data 
+
+##5.2. Data Exploration 
+```{r}
+#p <- ggpairs(human, mapping = aes(col="blue", alpha=0.3), lower = list(combo = wrap("facethist", bins = 20)))
+ggpairs(human)
+```
+# compute the correlation matrix and visualize it with corrplot
+#cor(human) %>% round(digits=2) %>% corrplot.mixed(tl.cex = 0.7,number.cex=0.7,order="hclust",addrect=2)
+```{r}
+cor_matrix<-cor(human)%>% round(digits =2)
+corrplot(cor_matrix, method="circle", type = "upper", cl.pos = "b", tl.pos = "d", tl.cex = 0.6)
+```
+* Edu.Exp is normally distributed
+* Edu.Exp is negatively correlated with Ado.Birth 
+* Life.Exp is highly correlated to GNI and Edu.Exp 
+* Life.Exp is negatively correlated to Mat.Mor
+* Parli.F doesnt have much impact on the other variables but correlaetd to Female to Male labour ratio
+
+##5.3. Principal Component Analysis on the not standardized human data
+
+```{r}
+
+pca_human <- prcomp(human)
+biplot(pca_human, choices = 1:2, cex = c(0.5,0.5), col = c("orange", "purple"), main="Biplot of the first two principal components for the unscaled data")
+```
+*Only GNI is visible
+*Correlation is negligible
+*High variance
+*Qatar seems to be outlier
+
+##5.4 Principal Component Analysis on the Standardized human data
+
+**Lets scale the data for better interpretation
+
+```{r}
+human_scale <- scale(human)
+summary(human_scale)
+summary(human)
+```
+
+**Check PCA after scaling
+
+```{r}
+pca_human <- prcomp(human_scale)
+biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("orange", "purple"), main="Biplot of the first two principal components for the scaled data")
+```
+
+Distribution of Countries explains the individual records. Data is now normalized with different parameters. Countries are now separated with respect to correlations with Principal Components
+
+##5.5. PCA Observations
+
+**Observations
+* PC1 has high correlation with Mat.Mor
+* PC2 has high correlation with Parli.F
+* High correlation between Mat.Mor, Ado.Birth, Edu.Exp, Edu2.FM, Life.Exp and GNi, 
+* Life.Exp, GNI, Edu.Exp, Edu2.FM is opposite side of Mat.Mor and Ado.Birth which indicates importance of Edu. Exp and Life expectancy
+* Female representation in Parliament seems to indicate high GNI, Life Expectancy and greater Female to Male labor ratio.
+
+
+##5.6. Multiple Correspondence Analysis (MCA)
+
+In the case of categorical variables dimensionality reduction can be provided using correspondence analysis (CA, n=2 variables) or multiple corresponding analysis (MCA, n>2). MCA is a generalization of PCA and an extension of CA. In this analysis cross tabulation matrices between all variables in the data set are used. The information from cross-tabulations has to be presented in clear graphical form. MCA could be used for example as a pre-processing for clustering.
+
+
+###5.4.1 The data
+
+Here we use tea data from FactoMineR package.
+```{r}
+library(FactoMineR)
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+data("tea")
+keep_columns <- c("Tea","price","How", "how", "sugar", "where","lunch")
+tea_time <- dplyr::select(tea, one_of(keep_columns))
+summary(tea_time)
+```
+
+```{r}
+str(tea_time)
+```
+Selected Parameters : Tea, price, How, how, sugar, where and lunch.
+
+Graphically the date are presented as barplots using ggplot() function.
+```{r}
+gather(tea_time) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()+theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) 
+```
+* Very Few peope drink Cheap tea.
+* Most people drink tea alone with tea bags and preferred tea variety is Earl Grey at Chain Shops.
+
+Next MCA analysis on the chosen tea data is provided.
+```{r}
+mca <- MCA(tea_time, graph = FALSE)
+summary(mca)
+```
+
+```{r}
+plot(mca, invisible=c("ind"), habillage = "quali")
+```
+
+* Tea Shop usually has unpackaged tea with high prices (p_upscale)
+* People usually have Earl Gray and more likely to have it with sugar and milk. 
+* Green Tea is cut from all..(Explains a lot)
+

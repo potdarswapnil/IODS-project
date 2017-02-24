@@ -2,14 +2,15 @@
 
 ##5.1. Human Data from United Nations 
 
-#Load Libraries
+
 ```{r}
+#load libraries
 library(GGally)
 library(corrplot)
 library(tidyr)
 library(dplyr)
 ```
-# data
+
 
 ```{r}
 ```
@@ -30,7 +31,7 @@ str(human)
 *Ado.Birth: the rate of teenage pregnancies leading to child birth
 *Parli.F: the percentage of female parliamentarians
 
-#Data 
+
 
 ##5.2. Data Exploration 
 ```{r}
